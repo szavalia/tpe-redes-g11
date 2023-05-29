@@ -5,22 +5,22 @@ networks:
     internal: false
 
 services:
-  # jenkins-docker:
-  #   container_name: jenkins-docker
-  #   image: docker:dind
-  #   privileged: true
-  #   command: --storage-driver=overlay2
-  #   networks:
-  #     jenkins:
-  #       aliases:
-  #       - docker
-  #   environment:
-  #     - DOCKER_TLS_CERDIR=/certs
-  #   volumes:
-  #     - jenkins-docker-certs:/certs/client
-  #     - jenkins-data:/var/jenkins_home
-  #   ports: 
-  #     - 2376:2376
+  jenkins-docker:
+    container_name: jenkins-docker
+    image: docker:dind
+    privileged: true
+    command: --storage-driver=overlay2
+    networks:
+      jenkins:
+        aliases:
+        - docker
+    environment:
+      - DOCKER_TLS_CERDIR=/certs
+    volumes:
+      - jenkins-docker-certs:/certs/client
+      - jenkins-data:/var/jenkins_home
+    ports: 
+      - 2376:2376
 
   jenkins-blueocean:
     container_name: jenkins-blueocean
@@ -42,18 +42,6 @@ services:
     volumes:
       - jenkins-data:/var/jenkins_home
       - jenkins-docker-certs:/certs/client:ro
-
-  jenkins-host:
-    container_name: cloud_agent
-    image: alpine/socat
-    command: tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
-    restart: always
-    ports:
-      - 2376:2375
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - jenkins
 
 volumes:
   jenkins-data:
