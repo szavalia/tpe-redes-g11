@@ -10,7 +10,9 @@ pipeline {
             steps{ 
                 echo "Fetching 💡"
                 sh'''
-                    git clone https://github.com/szavalia/todo-app
+                  git clone https://github.com/szavalia/todo-app
+                  cd todo-app
+                  yarn
                 '''
             } 
         }
@@ -19,7 +21,6 @@ pipeline {
                 echo "Testing ️🥊"
                 sh '''
                 cd todo-app
-                yarn
                 yarn test
                 '''
             }
