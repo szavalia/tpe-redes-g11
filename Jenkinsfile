@@ -10,34 +10,34 @@ pipeline {
     }
     
     stages {
-        // stage('Fetch') {
-        //     steps{ 
-        //         echo "Fetching 💡"
-        //         sh '''
-        //           cd todo-app
-        //           yarn
-        //         '''
-        //     } 
-        // }
-        // stage('Test') {
-        //     steps { 
-        //         echo "Testing ️🥊"
-        //         sh '''
-        //         cd todo-app
-        //         yarn test
-        //         '''
-        //     }
-        // }
-        // stage('Build') {
-        //     steps {
-        //         // You can add your build steps here
-        //         echo "Building 🛠️"
-        //         sh '''
-        //         cd todo-app
-        //         yarn build
-        //         '''
-        //     }
-        // }
+        stage('Fetch') {
+            steps{ 
+                echo "Fetching 💡"
+                sh '''
+                  cd todo-app
+                  yarn
+                '''
+            } 
+        }
+        stage('Test') {
+            steps { 
+                echo "Testing ️🥊"
+                sh '''
+                cd todo-app
+                yarn test
+                '''
+            }
+        }
+        stage('Build') {
+            steps {
+                // You can add your build steps here
+                echo "Building 🛠️"
+                sh '''
+                cd todo-app
+                yarn build
+                '''
+            }
+        }
         stage('Deploy') {
             steps {
                 echo "Deploying 🚀"
