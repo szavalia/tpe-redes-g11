@@ -43,6 +43,16 @@ services:
       - jenkins-data:/var/jenkins_home
       - jenkins-docker-certs:/certs/client:ro
 
+  # Used for email notifications
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: mailhog
+    networks:
+      - jenkins
+    ports:
+      - 1025:1025
+      - 8025:8025
+
 volumes:
   jenkins-data:
   jenkins-docker-certs:
