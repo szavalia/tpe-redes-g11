@@ -38,5 +38,14 @@ pipeline {
                 '''
             }
         }
+        stage('Deploy') {
+            steps {
+                echo "Deploying 🚀"
+                sh '''
+                cd todo-app
+                yarn deploy
+                '''
+            }
+        }
     }
 }
