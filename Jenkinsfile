@@ -13,7 +13,7 @@ pipeline {
         stage('Fetch') {
             steps{ 
                 echo "Fetching 💡"
-                sh'''
+                sh '''
                   cd todo-app
                   yarn
                 '''
