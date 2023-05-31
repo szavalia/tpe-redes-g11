@@ -4,13 +4,22 @@ pipeline {
             label 'docker-agent-node'
         }
     }
+
+    environment {
+      CI = 'true'
+    }
     
     stages {
         stage('Fetch') {
             steps{ 
                 echo "Fetching 💡"
                 sh'''
+<<<<<<< Updated upstream
                     git clone https://github.com/szavalia/todo-app
+=======
+                  cd todo-app
+                  yarn
+>>>>>>> Stashed changes
                 '''
             } 
         }
