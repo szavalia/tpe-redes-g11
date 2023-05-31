@@ -14,12 +14,8 @@ pipeline {
             steps{ 
                 echo "Fetching 💡"
                 sh'''
-<<<<<<< Updated upstream
-                    git clone https://github.com/szavalia/todo-app
-=======
                   cd todo-app
                   yarn
->>>>>>> Stashed changes
                 '''
             } 
         }
@@ -28,7 +24,6 @@ pipeline {
                 echo "Testing ️🥊"
                 sh '''
                 cd todo-app
-                yarn
                 yarn test
                 '''
             }
