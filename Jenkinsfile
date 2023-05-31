@@ -48,4 +48,11 @@ pipeline {
             }
         }
     }
+
+    post {
+      failure {
+        echo "Build failed 😞"
+        emailext body: "Build failed 😞", recipientProviders: ['szavalia@itba.edu.ar'], subject: "Build failed 😞"
+      }
+    }
 }
