@@ -15,7 +15,7 @@ pipeline {
                 echo "Fetching 💡"
                 sh '''
                   cd todo-app
-                  yarn
+                  yarn install --silent --frozen-lockfile
                 '''
             } 
         }
