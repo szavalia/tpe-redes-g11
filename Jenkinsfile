@@ -40,6 +40,8 @@ pipeline {
         }
         stage('Deploy') {
             steps {
+                input(message: 'Deploy to production?', ok: 'Deploy', submitter: 'szavalia, admin')
+
                 echo "Deploying 🚀"
                 sh '''
                 cd todo-app
@@ -53,6 +55,10 @@ pipeline {
       failure {
         echo "Build failed 😞"
         emailext body: "Build failed 😞", subject: "Build failed 😞", to: 'szavalia@itba.edu.ar'
+      }
+      success { 
+        echo "Build succeeded 😊"
+        emailext body: "Build succeeded 😊", subject: "Build succeeded 😊", to: 'szavalia@itba.edu.ar'
       }
     }
 }
