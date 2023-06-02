@@ -40,7 +40,7 @@ pipeline {
         // }
         stage('Deploy') {
             steps {
-                input(message: 'Deploy to production?', ok: 'Deploy', submitter: 'szavalia, admin')
+                input(message: 'Deploy to production?', ok: 'Deploy', submitter: 'admin')
 
                 echo "Deploying 🚀"
                 sh '''
