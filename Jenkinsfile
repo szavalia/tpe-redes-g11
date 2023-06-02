@@ -10,34 +10,34 @@ pipeline {
     }
     
     stages {
-        stage('Fetch') {
-            steps{ 
-                echo "Fetching 💡"
-                sh '''
-                  cd todo-app
-                  yarn install --silent --frozen-lockfile
-                '''
-            } 
-        }
-        stage('Test') {
-            steps { 
-                echo "Testing ️🥊"
-                sh '''
-                cd todo-app
-                yarn test
-                '''
-            }
-        }
-        stage('Build') {
-            steps {
-                // You can add your build steps here
-                echo "Building 🛠️"
-                sh '''
-                cd todo-app
-                yarn build
-                '''
-            }
-        }
+        // stage('Fetch') {
+        //     steps{ 
+        //         echo "Fetching 💡"
+        //         sh '''
+        //           cd todo-app
+        //           yarn install --silent --frozen-lockfile
+        //         '''
+        //     } 
+        // }
+        // stage('Test') {
+        //     steps { 
+        //         echo "Testing ️🥊"
+        //         sh '''
+        //         cd todo-app
+        //         yarn test
+        //         '''
+        //     }
+        // }
+        // stage('Build') {
+        //     steps {
+        //         // You can add your build steps here
+        //         echo "Building 🛠️"
+        //         sh '''
+        //         cd todo-app
+        //         yarn build
+        //         '''
+        //     }
+        // }
         stage('Deploy') {
             steps {
                 input(message: 'Deploy to production?', ok: 'Deploy', submitter: 'szavalia, admin')
