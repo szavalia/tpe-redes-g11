@@ -26,7 +26,7 @@ pipeline {
                         //get the hash of the file and use it as key for the cache
                         def packageJsonHash = sh(script: "echo -n '${currentPackageJson}' | sha256sum | awk '{ print \$1 }'", returnStdout: true).trim()
                         echo "file hash: "
-                        sh "echp ${packageJsonHash}"
+                        sh "echo ${packageJsonHash}"
                         cache('node_modules' , packageJsonHash) {
                                 echo "updating node-modules"
                                 // if not found on cache, then install node-modules
