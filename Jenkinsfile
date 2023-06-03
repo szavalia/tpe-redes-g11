@@ -6,40 +6,24 @@ pipeline {
     }
     
     stages {
-        stage('Fetch and install dependencies') {
+        stage('Fetch') {
             steps{ 
                 echo "Fetching 💡"
                 def sourceRepo = checkout([$class: 'GitSCM', 
                                                 branches: [[name: '*/master']],
                                                 userRemoteConfigs: [[url: 'https://github.com/szvalia/todo-app']]])
-
-                def dependenciesChanged = false;
-                for (changeSet in sourceRepo) {
-                    for (change in changeSet.getAffectedFiles()) {
-                        if (change.getPath().startsWith('package.json')) {
-                            dependenciesChanged = true
-                            break
-                        }
+            }
+        }
+        stage('Install dependencies'){
+            dir("${WORKSPACE}"){
+                def currentPackageJson = sh(script: "cat package.json", returnStdout: true).trim()
+                //get the hash of the file and use it as key for the cache
+                def packageJsonHash = sh(script: "echo -n '${currentPackageJson}' | sha256sum | awk '{ print \$1 }'", returnStdout: true).trim()
+                cache('node_modules' , packageJsonHash) {
+                        // if not found on cache, then install node-modules
+                        sh "yarn install"
                     }
-                    if (dependenciesChanged) {
-                        break
-                    }
-                }
-
-                if (dependenciesChanged) {
-                    echo "Changes detected in package.json. Performing clean install..."
-                    // Clean install as package.json has changed
-                    sh "cd ${WORKSPACE} && rm -rf node_modules"
-                    sh "cd ${WORKSPACE} && yarn install"
-                } else {
-                    echo "No changes to package.json. Restoring cache..."
-                    // Use cache to restore node_modules if available
-                    cache('node_modules') {
-                        // No changes, use cached node_modules
-                        sh "cd ${WORKSPACE} && yarn install"
-                    }
-                }
-
+                
             }
         }
         stage('Test') {
@@ -57,3 +41,9 @@ pipeline {
         }
     }
 }
+
+
+//check if package json has changed
+def getFileHash(filePath) {
+}
+
