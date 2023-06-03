@@ -10,14 +10,17 @@ pipeline {
             steps{ 
                 echo "Fetching 💡"
                 checkout([$class: 'GitSCM', 
-                                                branches: [[name: '*/master']],
+                                                branches: [[name: '*/main']],
                                                 userRemoteConfigs: [[url: 'https://github.com/szavalia/todo-app']]])
+                echo "Fetched all"
+                    
             }
         }
         stage('Install dependencies'){
             steps{
                 script{
                     dir("${WORKSPACE}"){
+                        ls
                         def currentPackageJson = sh(script: "cat package.json", returnStdout: true).trim()
                         //get the hash of the file and use it as key for the cache
                         def packageJsonHash = sh(script: "echo -n '${currentPackageJson}' | sha256sum | awk '{ print \$1 }'", returnStdout: true).trim()
