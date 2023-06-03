@@ -11,7 +11,7 @@ pipeline {
                 echo "Fetching 💡"
                 checkout([$class: 'GitSCM', 
                                                 branches: [[name: '*/master']],
-                                                userRemoteConfigs: [[url: 'https://github.com/szvalia/todo-app']]])
+                                                userRemoteConfigs: [[url: 'https://github.com/szavalia/todo-app']]])
             }
         }
         stage('Install dependencies'){
