@@ -9,21 +9,23 @@ pipeline {
         stage('Fetch') {
             steps{ 
                 echo "Fetching 💡"
-                def sourceRepo = checkout([$class: 'GitSCM', 
+                checkout([$class: 'GitSCM', 
                                                 branches: [[name: '*/master']],
                                                 userRemoteConfigs: [[url: 'https://github.com/szvalia/todo-app']]])
             }
         }
         stage('Install dependencies'){
-            dir("${WORKSPACE}"){
-                def currentPackageJson = sh(script: "cat package.json", returnStdout: true).trim()
-                //get the hash of the file and use it as key for the cache
-                def packageJsonHash = sh(script: "echo -n '${currentPackageJson}' | sha256sum | awk '{ print \$1 }'", returnStdout: true).trim()
-                cache('node_modules' , packageJsonHash) {
-                        // if not found on cache, then install node-modules
-                        sh "yarn install"
-                    }
-                
+            steps{
+                dir("${WORKSPACE}"){
+                    def currentPackageJson = sh(script: "cat package.json", returnStdout: true).trim()
+                    //get the hash of the file and use it as key for the cache
+                    def packageJsonHash = sh(script: "echo -n '${currentPackageJson}' | sha256sum | awk '{ print \$1 }'", returnStdout: true).trim()
+                    cache('node_modules' , packageJsonHash) {
+                            // if not found on cache, then install node-modules
+                            sh "yarn install"
+                        }
+                    
+                }
             }
         }
         stage('Test') {
@@ -41,9 +43,3 @@ pipeline {
         }
     }
 }
-
-
-//check if package json has changed
-def getFileHash(filePath) {
-}
-
