@@ -17,19 +17,20 @@ pipeline {
             }
         }
         stage('Install dependencies'){
+            environment {
+                   PACKAGE_JSON_HASH = ''                                 //can be used in this stage only
+              }
             steps{
-                def packageJsonHash
                 dir("${WORKSPACE}"){
                     
                     echo "checking for cache"
                     script{
                             def currentPackageJson = sh(script: "cat package.json", returnStdout: true).trim()
                             //get the hash of the file and use it as key for the cache
-                            packageJsonHash = sh(script: "echo -n '${currentPackageJson}' | sha256sum | awk '{ print \$1 }'", returnStdout: true).trim()
-                            echo "file hash: "
-                            sh "echo ${packageJsonHash}"       
+                            env.PACKAGE_JSON_HASH = sh(script: "echo -n '${currentPackageJson}' | sha256sum | awk '{ print \$1 }'", returnStdout: true).trim()    
                     }
-                    cache('node_modules' , packageJsonHash) {
+                    echo env.PACKAGE_JSON_HASH
+                    cache('node_modules' , env.PACKAGE_JSON_HASH) {
                                 echo "updating node-modules"
                                 // if not found on cache, then install node-modules
                                 sh "yarn install"
