@@ -24,11 +24,7 @@ services:
 
   jenkins-blueocean:
     container_name: jenkins-blueocean
-    build: 
-      context: .
-      dockerfile: Dockerfile
-      tags:
-      - myjenkins-blueocean:2.387.3-1
+    image: myjenkins-blueocean:2.387.3-1
     ports:
       - 8888:8080
       - 50000:50000
