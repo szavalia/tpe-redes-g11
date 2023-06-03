@@ -29,7 +29,7 @@ pipeline {
                             echo "file hash: "
                             sh "echo ${packageJsonHash}"       
                     }
-                    cache('node_modules' , ${packageJsonHash}) {
+                    cache('node_modules' , packageJsonHash) {
                                 echo "updating node-modules"
                                 // if not found on cache, then install node-modules
                                 sh "yarn install"
