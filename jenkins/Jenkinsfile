@@ -42,11 +42,11 @@ pipeline {
                 // sh '''
                 // yarn build
                 // '''
-                mkdir build
-                touch build/test.txt
+                sh 'mkdir build'
+                sh 'touch build/test.txt'
 
                 sh 'printenv'
-                
+
                 // echo 'scp -P ${env.REMOTE_PORT} -r build/ ${env.REMOTE_USER}@${env.REMOTE_HOST}:${env.REMOTE_DIRECTORY}'
                 
                 // Copy the build to the remote server
