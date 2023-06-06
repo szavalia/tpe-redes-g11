@@ -51,7 +51,7 @@ pipeline {
                 
                 // Copy the build to the remote server
                 sshagent(['SSH_KEY']) {
-                    sh 'scp -P $REMOTE_PORT -r build/ $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIRECTORY'
+                    sh 'scp -P $REMOTE_PORT -o StrictHostKeyChecking=no -r build/ $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIRECTORY'
                 }
             }
         }
