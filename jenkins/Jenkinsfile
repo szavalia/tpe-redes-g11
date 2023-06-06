@@ -50,9 +50,9 @@ pipeline {
                 // echo 'scp -P ${env.REMOTE_PORT} -r build/ ${env.REMOTE_USER}@${env.REMOTE_HOST}:${env.REMOTE_DIRECTORY}'
                 
                 // Copy the build to the remote server
-                // sshagent(['SSH_KEY']) {
-                // sh 'scp -P $env.REMOTE_PORT -r build/ $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIRECTORY'
-                // }
+                sshagent(['SSH_KEY']) {
+                    sh 'scp -P $REMOTE_PORT -r build/ $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIRECTORY'
+                }
             }
         }
         // stage('Deploy') {
