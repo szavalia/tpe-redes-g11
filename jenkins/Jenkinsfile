@@ -41,7 +41,6 @@ pipeline {
 
                 echo "Deploying 🚀"
                 sh '''
-                cd todo-app
                 yarn start
                 '''
             }
