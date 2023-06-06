@@ -62,14 +62,14 @@ pipeline {
         // }
     }
 
-    post {
-      failure {
-        echo "Build failed 😞"
-        emailext body: "Build failed 😞", subject: "Build failed 😞", to: 'szavalia@itba.edu.ar'
-      }
-      success { 
-        echo "Build succeeded 😊"
-        emailext body: "Build succeeded 😊", subject: "Build succeeded 😊", to: 'szavalia@itba.edu.ar'
-      }
-    }
+    // post {
+    //   failure {
+    //     echo "Build failed 😞"
+    //     emailext body: "Build failed 😞", subject: "Build failed 😞", to: 'szavalia@itba.edu.ar'
+    //   }
+    //   success { 
+    //     echo "Build succeeded 😊"
+    //     emailext body: "Build succeeded 😊", subject: "Build succeeded 😊", to: 'szavalia@itba.edu.ar'
+    //   }
+    // }
 }
