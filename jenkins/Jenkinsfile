@@ -7,7 +7,7 @@ pipeline {
 
     environment {
       CI = 'true'
-        SSH_KEY = credentials('SSH_KEY')  // Add your SSH private key credential ID here
+        SSH_KEY = credentials('SSH_KEY') 
         REMOTE_USER = 'vriera-server'
         REMOTE_HOST = '186.139.150.69'
         REMOTE_PORT = '7022'
@@ -44,7 +44,7 @@ pipeline {
 
                 // Copy the build to the remote server
                 sshagent(['SSH_KEY']) {
-                sh "scp -P ${env.REMOTE_PORT} -i ${env.SSH_KEY} -r build/ ${env.REMOTE_USER}@${env.REMOTE_HOST}:${env.REMOTE_DIRECTORY}"
+                sh "scp -P ${env.REMOTE_PORT} -r build/ ${env.REMOTE_USER}@${env.REMOTE_HOST}:${env.REMOTE_DIRECTORY}"
                 }
             }
         }
