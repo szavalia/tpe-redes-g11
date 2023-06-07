@@ -19,7 +19,7 @@ pipeline {
             steps{ 
                 checkout([$class: 'GitSCM', 
                                                 branches: [[name: '*/main']],
-                                                userRemoteConfigs: [[url: 'https://github.com/szavalia/todo-app']]])
+                                                userRemoteConfigs: [[credentialsId:'ssh-key' , url: 'https://github.com/szavalia/todo-app']]])
                 echo "${WORKSPACE}"
                 sh "echo ${PWD}"
                 echo "Fetching 💡"
