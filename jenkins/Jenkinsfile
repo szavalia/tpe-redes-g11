@@ -7,8 +7,10 @@ pipeline {
 
     environment {
         CI = 'true'
-        
-
+        REMOTE_USER = 'vriera-server'
+        REMOTE_HOST = '186.139.150.69'
+        REMOTE_PORT = '7022'
+        REMOTE_DIRECTORY = '/home/vriera-server/redes/builds'
     }
     
     stages {
@@ -29,43 +31,32 @@ pipeline {
             }
         }
         stage('Build') {
-            environment {
-                REMOTE_USER = 'vriera-server'
-                REMOTE_HOST = '186.139.150.69'
-                REMOTE_PORT = '7022'
-                REMOTE_DIRECTORY = '/home/vriera-server/redes/builds'
-            }
+            
             steps {
                 // You can add your build steps here
                 echo "Building 🛠️"
-                // sh '''
-                // yarn build
-                // '''
-                sh 'mkdir build'
-                sh 'touch build/test.txt'
+                sh '''
+                yarn build
+                '''
+            }
+        }
+        stage('Deploy') {
+            steps {
+                input(message: 'Deploy to production?', ok: 'Deploy', submitter: 'admin')
 
-                sh 'printenv'
-
-                // echo 'scp -P ${env.REMOTE_PORT} -r build/ ${env.REMOTE_USER}@${env.REMOTE_HOST}:${env.REMOTE_DIRECTORY}'
-                
+                echo "Deploying 🚀"
                 // Copy the build to the remote server
                 sshagent(credentials: ['ssh-key']) {
-                    sh 'scp -P $REMOTE_PORT -o StrictHostKeyChecking=no -r build/ $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIRECTORY'
+                    sh 'scp -P $REMOTE_PORT -o StrictHostKeyChecking=no -r build/ $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIRECTORY/$BUILD_ID'
+                }
+
+                // Deploy the build on the remote server
+                sshagent(credentials: ['ssh-key']) {
+                    sshCommand remote: "${env.REMOTE_USER}@${env.REMOTE_HOST}", port: env.REMOTE_PORT, 
+                    command: "cd ${env.REMOTE_DIRECTORY} && ./deploy.sh"
                 }
             }
         }
-        // stage('Deploy') {
-        //     steps {
-        //         input(message: 'Deploy to production?', ok: 'Deploy', submitter: 'admin')
-
-        //         echo "Deploying 🚀"
-        //         // Deploy the build on the remote server
-        //         sshagent(['SSH_KEY']) {
-        //             sshCommand remote: "${env.REMOTE_USER}@${env.REMOTE_HOST}", port: env.REMOTE_PORT, 
-        //             command: "cd ${env.REMOTE_DIRECTORY} && ls "
-        //         }
-        //     }
-        // }
     }
 
     // post {
