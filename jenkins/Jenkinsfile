@@ -21,7 +21,7 @@ pipeline {
                                                 branches: [[name: '*/main']],
                                                 userRemoteConfigs: [[credentialsId:'ssh-key' , url: 'https://github.com/szavalia/todo-app']]])
                 echo "${WORKSPACE}"
-                
+                 sh "ls -lat"
             } 
         }
         stage('Fetch') {
