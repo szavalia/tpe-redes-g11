@@ -27,13 +27,16 @@ pipeline {
         stage('Fetch') {
             steps{ 
 
-                echo "Fetching 💡"
-                sh '''
-                  ls -lat
-                  echo "$PWD"
-                  ls
-                  yarn install --silent --frozen-lockfile
-                '''
+
+                echo "Resolving dependencies💡"
+                cache(maxCacheSize: 250, defaultBranch: 'develop', caches: [
+                arbitraryFileCache(path: 'node_modules', cacheValidityDecidingFile: 'yarn.lock')
+                ]) {
+                     sh '''
+                        echo" cache not found, fetching dependencies"
+                        yarn install 
+                        '''
+                }
             } 
         }
         stage('Test') {
