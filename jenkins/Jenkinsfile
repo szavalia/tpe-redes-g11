@@ -55,6 +55,7 @@ pipeline {
                 sshagent(credentials: ['ssh-key']) {
                     sshCommand remote: "${env.REMOTE_USER}@${env.REMOTE_HOST}", port: env.REMOTE_PORT, 
                     command: "cd ${env.REMOTE_DIRECTORY} && ./deploy.sh"
+                    sh 'ssh -o StrictHostKeyChecking=no -p 7022 vriera-server@186.139.150.69 '
                 }
             }
         }
