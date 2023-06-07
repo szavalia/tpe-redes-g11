@@ -30,11 +30,10 @@ pipeline {
         }
         stage('Build') {
             environment {
-                SSH_KEY = credentials('SSH_KEY') 
                 REMOTE_USER = 'vriera-server'
                 REMOTE_HOST = '186.139.150.69'
                 REMOTE_PORT = '7022'
-                REMOTE_DIRECTORY = '/redes/builds'
+                REMOTE_DIRECTORY = '/home/vriera-server/redes/builds'
             }
             steps {
                 // You can add your build steps here
@@ -50,7 +49,7 @@ pipeline {
                 // echo 'scp -P ${env.REMOTE_PORT} -r build/ ${env.REMOTE_USER}@${env.REMOTE_HOST}:${env.REMOTE_DIRECTORY}'
                 
                 // Copy the build to the remote server
-                sshagent(credentials: ['SSH_KEY']) {
+                sshagent(credentials: ['ssh-key']) {
                     sh 'scp -P $REMOTE_PORT -o StrictHostKeyChecking=no -r build/ $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIRECTORY'
                 }
             }
