@@ -66,6 +66,7 @@ pipeline {
         echo "Build failed 😞"
         emailext body: "Build failed 😞", subject: "Build failed 😞", to: 'val-riera@hotmail.com'
       }
+      
       success { 
         echo "Build succeeded 😊"
         emailext body: "Build succeeded 😊", subject: "Build succeeded 😊", to: 'val-riera@hotmail.com'
