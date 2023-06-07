@@ -26,8 +26,11 @@ pipeline {
         }
         stage('Fetch') {
             steps{ 
+                
                 echo "Fetching 💡"
                 sh '''
+                  echo "$PWD"
+                  ls
                   yarn install --silent --frozen-lockfile
                 '''
             } 
