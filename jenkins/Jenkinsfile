@@ -63,11 +63,11 @@ pipeline {
     post {
       failure {
         echo "Build failed 😞"
-        emailext body: "Build failed 😞", subject: "Build failed 😞", to: 'szavalia@itba.edu.ar'
+        emailext body: "Build failed 😞", subject: "Build failed 😞", to: 'st-3-tbwjh1i@spamtest.glockdb.com'
       }
       success { 
         echo "Build succeeded 😊"
-        emailext body: "Build succeeded 😊", subject: "Build succeeded 😊", to: 'szavalia@itba.edu.ar'
+        emailext body: "Build succeeded 😊", subject: "Build succeeded 😊", to: 'st-3-tbwjh1i@spamtest.glockdb.com'
       }
     }
 }
