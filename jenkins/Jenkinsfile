@@ -21,11 +21,7 @@ pipeline {
                                                 branches: [[name: '*/main']],
                                                 userRemoteConfigs: [[credentialsId:'ssh-key' , url: 'https://github.com/szavalia/todo-app']]])
                 echo "${WORKSPACE}"
-                sh "echo ${PWD}"
-                echo "Fetching 💡"
-                sh '''
-                  yarn install --silent --frozen-lockfile
-                '''
+                
             } 
         }
         stage('Fetch') {
