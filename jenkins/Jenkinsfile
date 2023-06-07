@@ -29,7 +29,7 @@ pipeline {
 
                 echo "Fetching 💡"
                 sh '''
-                  sh "ls -lat"
+                  ls -lat
                   echo "$PWD"
                   ls
                   yarn install --silent --frozen-lockfile
