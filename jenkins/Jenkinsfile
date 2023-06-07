@@ -33,7 +33,7 @@ pipeline {
                 arbitraryFileCache(path: 'node_modules', cacheValidityDecidingFile: 'yarn.lock')
                 ]) {
                      sh '''
-                        echo" cache not found, fetching dependencies"
+                        echo "cache not found, fetching dependencies"
                         yarn install 
                         '''
                 }
