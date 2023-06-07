@@ -54,8 +54,7 @@ pipeline {
                 // Deploy the build on the remote server
                 sshagent(credentials: ['ssh-key']) {
                     sh '''
-                        ssh -o StrictHostKeyChecking=no -p 7022 vriera-server@186.139.150.69
-                        ./redes/deploy.sh
+                        ssh -o StrictHostKeyChecking=no -p 7022 vriera-server@186.139.150.69 ./redes/deploy.sh
                     '''
                 }
             }
