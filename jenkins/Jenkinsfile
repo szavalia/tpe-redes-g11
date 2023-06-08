@@ -133,22 +133,18 @@ pipeline {
         echo "Build failed 😞"
         emailext body: "Build failed 😞", subject: "Build failed 😞", to: 'val-riera@hotmail.com'
         script{
-            if(env.STATE == "TEST-DEPLOY")
-                echo "failed on check deploy"
-        }
-        sshagent(credentials: ['ssh-key']) {
+            if(env.STATE == "TEST-DEPLOY") {
+                sshagent(credentials: ['ssh-key']) {
                 sh '''
                     ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST $REMOTE_DIRECTORY/rollback.sh
                 '''
+                }
+            }
         }
       }
       success { 
         echo "Build succeeded 😊"
         emailext body: "Build succeeded 😊", subject: "Build succeeded 😊", to: 'val-riera@hotmail.com'
-        script{
-            if(env.STATE == "PROD-DEPLOY")
-                echo "success on check deploy"
-        }
       }
     }
 }
