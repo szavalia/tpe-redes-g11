@@ -363,7 +363,7 @@ pipeline {
         }
         sshagent(credentials: ['ssh-key']) {
                 sh '''
-                    ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST $REMOTE_DIRECTORY/rollback.sh
+                    ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST $REMOTE_DIRECTORY/rollback.sh todo-app-prod
                 '''
         }
       }
