@@ -85,21 +85,7 @@ pipeline {
             }
         }
 
-        stage('Test deployment') {
-            steps {
-                script{
-                    env.STATE="TEST-DEPLOY"
-                }
-                echo "Testing deployment 🧪"
-                // Deploy the build on the remote server
-                sshagent(credentials: ['ssh-key']) {
-                    sh '''
-                        ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST $REMOTE_DIRECTORY/healtcheck.sh
-                    '''
-                }
-            }
-        }
-
+        
         stage('Deploy') {
             when {
                 expression { env.TARGET == 'prod' }
@@ -115,11 +101,27 @@ pipeline {
                 // Deploy the build on the remote server
                 sshagent(credentials: ['ssh-key']) {
                     sh '''
-                        ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "$REMOTE_DIRECTORY/deploy.sh $BUILD_ID"
+                        ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "$REMOTE_DIRECTORY/prod.sh $BUILD_ID"
                     '''
                 }
             }
         }
+
+        stage('Test deployment') {
+            steps {
+                script{
+                    env.STATE="TEST-DEPLOY"
+                }
+                echo "Testing deployment 🧪"
+                // Deploy the build on the remote server
+                sshagent(credentials: ['ssh-key']) {
+                    sh '''
+                        ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST $REMOTE_DIRECTORY/healtcheck.sh
+                    '''
+                }
+            }
+        }
+
     }
 
     post {
