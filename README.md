@@ -137,11 +137,53 @@ Utilizamos una imágen personalizada de Docker que contiene NodeJS y Yarn. Esta 
 ## Crear un pipeline
 Luego de configurar los agentes, vamos a crear un pipeline para nuestro proyecto. Para esto, vamos a pulsar `New Item` y vamos a ingresar el nombre del pipeline. Luego, vamos a seleccionar `Pipeline` y vamos a pulsar `OK`. 
 
-En la sección `Pipeline`, vamos a seleccionar `Pipeline script from SCM` y vamos a ingresar la URL del repositorio. En este caso, vamos a usar `https://github.com/szavalia/tpe-redes-g11` y apuntar el `Jenkins Script` a `jenkins/Jenkinsfile`.
+En la sección `Pipeline`, vamos a seleccionar `Pipeline script from SCM` y vamos a ingresar la URL del repositorio. En este caso, vamos a usar `https://github.com/szavalia/tpe-redes-g11` y apuntar el `Jenkins Script` a `jenkins/Jenkinsfile`. También debemos configurar una credencial para poder acceder al repositorio. Para esto, vamos a pulsar `Add` en el campo `Credentials` y vamos a seleccionar agregar los datos que autentiquen nuestro acceso al repositorio.
 
 ## Configurar el webhook
 Ahora vamos a configurar el pipeline para que pueda detectar cambios con el webhook. Para esto, primero debemos configurar un sistema de forwarding que permita que nuestro servidor de Jenkins sea accesible desde internet. Para esto, vamos a usar [ngrok](https://ngrok.com/).
 
 
+## Cómo enviar mails al equipo de DevOps
+Para poder enviar mails frente a fracasos al hacer un despliegue, primero tenemos que configurar el plugin built-in Extended E-mail Notification. Para esto, vamos a `Manage Jenkins > Configure System > Extended E-mail Notification`. En la sección `SMTP server`, vamos a ingresar los siguientes datos:
+- `SMTP server`: `smtp.gmail.com`
+- `SMT Port`: `587`
+En las opciones `Advanced`, vamos a habilitar la opción `Use TLS`.
 
+Luego, al final del script del pipeline, vamos a agregar el siguiente código:
+```groovy
+post {
+      failure {
+        echo "Build failed 😞"
+        emailext body: "Build failed 😞", subject: "Build failed 😞", to: 'val-riera@hotmail.com'
+        script{
+            if(env.STATE == "TEST-DEPLOY")
+                echo "failed on check deploy"
+        }
+      }
+      success { 
+        echo "Build succeeded 😊"
+        emailext body: "Build succeeded 😊", subject: "Build succeeded 😊", to: 'val-riera@hotmail.com'
+        script{
+            if(env.STATE == "PROD-DEPLOY")
+                echo "success on check deploy"
+        }
+      }
+    }
+```
 
+## Cómo permitir que sólo algunos usuarios puedan hacer despliegues
+
+### Configurar la política de seguridad
+Para que una lista de usuarios autorizados puedan hacer despliegues, primero vamos a tener que configurar las políticas de seguridad. Para eso, navegamos a `Manage Jenkins > Configure Global Security`. En la sección `Authorization`, vamos a seleccionar la opción ` Matrix Authorization Strategy`. Por ahora sólo tenemos un usuario `admin`, quien va a ser quien tiene permisos de `Administrator`, pero si quisiéramos tener un usuario que no puede realizar un deploy podemos configurarlo como a `Not Allowed` en el ejemplo a continuación: 
+
+![](resources/authorization-matrix.png)
+
+### Agregar un input al pipeline
+Luego, vamos a agregar un input al pipeline para que sólo el usuario `admin` pueda proceder al deployment. Para esto, vamos a agregar el siguiente código al principio del pipeline:
+```groovy
+    input(message: 'Deploy to production?', ok: 'Deploy', submitter: 'admin')
+```
+Vamos a poder controlar los usuarios que pueden hacer el deploy cambiando el valor del campo `submitter`, pero cualquiera que tenga acceso de escritura a la rama `main` del repositorio que alberga el `Jenkinsfile` podría cambiarlo y agregar su ID de usuario de Jenkins. Esto es una consideración de seguridad a tener en cuenta.
+
+## Cómo hacer un despliegue a un entorno remoto
+En primer lugar, vamos a tener que configurar el plugin SSH Agent. Vamos a agregarlo desde `Manage Jenkins > Manage Plugins` y vamos a seleccionar `SSH Agent`. Luego, vamos a tener que configurar una credencial para poder acceder al servidor remoto. Para esto, vamos a pulsar `Add` en el campo `Credentials` y vamos a seleccionar agregar los datos que autentiquen nuestro acceso al servidor remoto.
