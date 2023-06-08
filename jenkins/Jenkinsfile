@@ -87,6 +87,7 @@ pipeline {
 
         stage('Test deployment') {
             steps {
+                env.STATE="TEST-DEPLOY"
                 echo "Testing deployment 🧪"
                 // Deploy the build on the remote server
                 sshagent(credentials: ['ssh-key']) {
@@ -102,6 +103,7 @@ pipeline {
                 expression { env.TARGET == 'prod' }
             }
             steps {
+                env.STATE="PROD-DEPLOY"
                 input(message: 'Deploy to production?', ok: 'Deploy', submitter: 'admin')
                 
                 echo "Deploying to production 🚀"
@@ -120,10 +122,18 @@ pipeline {
       failure {
         echo "Build failed 😞"
         emailext body: "Build failed 😞", subject: "Build failed 😞", to: 'val-riera@hotmail.com'
+        script{
+            if(env.STATE == "TEST-DEPLOY")
+                echo "failed on check deploy"
+        }
       }
       success { 
         echo "Build succeeded 😊"
         emailext body: "Build succeeded 😊", subject: "Build succeeded 😊", to: 'val-riera@hotmail.com'
+        script{
+            if(env.STATE == "PROD-DEPLOY")
+                echo "success on check deploy"
+        }
       }
     }
 }
