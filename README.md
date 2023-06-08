@@ -155,7 +155,9 @@ Ahora Establezcamos la conexión desde github. En el repositorio que quiero buil
 
 Por ultimo, queremos que el pipeline sepa que va a estar esperando actualizaciones de este repositorio, así que vamos a la configuración del pipeline y le indicamos que su contenido viene de un repositorio de la siguiente manera: 
 ![](resources/github_project.png)
-Naturalmente cambiamos en link al repositorio con el que sea que estamos utilizando y listo, El webhook debería desencadenar un nuevo build. 
+tambien altero el trigger: 
+![](resources/triggers.png)
+Naturalmente cambiamos en link al repositorio al que sea que estamos utilizando y listo, El webhook debería desencadenar un nuevo build. 
 
 ## Cómo enviar mails al equipo de DevOps
 Para poder enviar mails frente a fracasos al hacer un despliegue, primero tenemos que configurar el plugin built-in Extended E-mail Notification. Para esto, vamos a `Manage Jenkins > Configure System > Extended E-mail Notification`. En la sección `SMTP server`, vamos a ingresar los siguientes datos:
