@@ -100,11 +100,48 @@ Luego, vamos a instalar los plugins que vamos a necesitar para el proyecto. Para
 No vamos a crear un usuario custom, sino que continuaremos con el usuario administrador. Tocar la opción `Continue as administrator`.
 
 ### Configurar Jenkins URL
-Vamos a dejar la URL de Jenkins como la default, `http://localhost:8080/`. Tocar la opción `Save and Finish`. Como último paso, vamos a tener que reiniciar Jenkins para cargar los plugins intalados.
+Vamos a dejar la URL de Jenkins como la default, `http://localhost:8888/`. Tocar la opción `Save and Finish`. Como último paso, vamos a tener que reiniciar Jenkins para cargar los plugins intalados.
 
 ### Iniciar sesión
 Vamos a iniciar sesión con las credenciales del usuario administrador que creamos.
 
 ## Configurar los agentes
+
+### Instalar Docker Plugin
+Para correr las tareas de buildeo, queremos que Jenkins utilice agentes dockerizados. Para lograr eso, primero debemos instalar el plugin `Docker` desde `Manage Jenkins > Manage Plugins`. 
+Luego, vamos a crear un agente del tipo Cloud navegando hasta `Manage Jenkins > Manage Nodes > Configure Clouds`. 
+![](resources/configure-cloud.png)
+
+### Configurar el certificado TLS
+Aquí vamos a tener que configurar nuestro agente, primero creando una conexión a docker. Para esto, tocamos el botón `Add a new cloud` y seleccionamos `Docker`. Luego, debemos configurar los certificados TLS que vamos a usar para conectarnos con el contenedor DinD. Para esto, vamos a hacer uso del volúmen `docker-certs` que creamos en el `docker-compose.yml` y los certificados de Jenkins. Primero vamos a configurar el `Docker Host URI` con `tcp://docker:2376`.
+
+Luego vamos a tener que recuperar nuestros certificados. Esto se logra corriendo los siguientes comandos:
+```bash
+docker exec jenkins-docker cat /certs/client/key.pem
+docker exec jenkins-docker cat /certs/client/cert.pem
+docker exec jenkins-docker cat /certs/server/ca.pem
+```
+
+Luego, debemos pulsar `Add credentials`, donde vamos a ingresar los certificados que acabamos de recuperar. Vamos a crear una nueva credencial del tipo `X.509 Client Certificate`. Para el campo `ID` vamos a usar `jenkins-docker-certs`. Para el campo `Description` vamos a usar `Docker TLS certificates`. Para el campo `Private Key`, vamos a ingresar el contenido de `key.pem`. Para el campo `Certificate`, vamos a ingresar el contenido de `cert.pem`. Para el campo `CA Certificate`, vamos a ingresar el contenido de `ca.pem`. Finalmente, vamos a pulsar `Add`.
+
+### Crear el template
+Ahora vamos a crear el template para nuestro agente. Para esto, vamos a pulsar `Add a new template` y vamos a ingresar la siguiente configuración:
+- `Labels`: `docker-agent-node`
+- `Name`: `docker-agent-node`
+- `Docker Image`: `vriera/agent-node`
+- `Instance Capacity`: 2
+- `Remote File System Root`: `/home/jenkins`
+
+Utilizamos una imágen personalizada de Docker que contiene NodeJS y Yarn. Esta imágen se encuentra en [Docker Hub](https://hub.docker.com/r/vriera/agent-node). 
+
+## Crear un pipeline
+Luego de configurar los agentes, vamos a crear un pipeline para nuestro proyecto. Para esto, vamos a pulsar `New Item` y vamos a ingresar el nombre del pipeline. Luego, vamos a seleccionar `Pipeline` y vamos a pulsar `OK`. 
+
+En la sección `Pipeline`, vamos a seleccionar `Pipeline script from SCM` y vamos a ingresar la URL del repositorio. En este caso, vamos a usar `https://github.com/szavalia/tpe-redes-g11` y apuntar el `Jenkins Script` a `jenkins/Jenkinsfile`.
+
+## Configurar el webhook
+Ahora vamos a configurar el pipeline para que pueda detectar cambios con el webhook. Para esto, primero debemos configurar un sistema de forwarding que permita que nuestro servidor de Jenkins sea accesible desde internet. Para esto, vamos a usar [ngrok](https://ngrok.com/).
+
+
 
 
