@@ -88,8 +88,7 @@ pipeline {
         stage('Test deployment') {
             steps {
                 script{
-                            env.STATE="TEST-DEPLOY"
-
+                    env.STATE="TEST-DEPLOY"
                 }
                 echo "Testing deployment 🧪"
                 // Deploy the build on the remote server
@@ -130,6 +129,11 @@ pipeline {
         script{
             if(env.STATE == "TEST-DEPLOY")
                 echo "failed on check deploy"
+        }
+        sshagent(credentials: ['ssh-key']) {
+                sh '''
+                    ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST $REMOTE_DIRECTORY/rollback.sh
+                '''
         }
       }
       success { 
