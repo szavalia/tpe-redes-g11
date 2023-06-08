@@ -87,7 +87,10 @@ pipeline {
 
         stage('Test deployment') {
             steps {
-                env.STATE="TEST-DEPLOY"
+                script{
+                            env.STATE="TEST-DEPLOY"
+
+                }
                 echo "Testing deployment 🧪"
                 // Deploy the build on the remote server
                 sshagent(credentials: ['ssh-key']) {
@@ -103,7 +106,9 @@ pipeline {
                 expression { env.TARGET == 'prod' }
             }
             steps {
-                env.STATE="PROD-DEPLOY"
+                script{
+                    env.STATE="PROD-DEPLOY"
+                }
                 input(message: 'Deploy to production?', ok: 'Deploy', submitter: 'admin')
                 
                 echo "Deploying to production 🚀"
