@@ -200,4 +200,179 @@ Luego, vamos a agregar un input al pipeline para que sólo el usuario `admin` pu
 Vamos a poder controlar los usuarios que pueden hacer el deploy cambiando el valor del campo `submitter`, pero cualquiera que tenga acceso de escritura a la rama `main` del repositorio que alberga el `Jenkinsfile` podría cambiarlo y agregar su ID de usuario de Jenkins. Esto es una consideración de seguridad a tener en cuenta.
 
 ## Cómo hacer un despliegue a un entorno remoto
-En primer lugar, vamos a tener que configurar el plugin SSH Agent. Vamos a agregarlo desde `Manage Jenkins > Manage Plugins` y vamos a seleccionar `SSH Agent`. Luego, vamos a tener que configurar una credencial para poder acceder al servidor remoto. Para esto, vamos a pulsar `Add` en el campo `Credentials` y vamos a seleccionar agregar los datos que autentiquen nuestro acceso al servidor remoto.
+
+### Configuracion de ambiente stage-dev
+El servidor esta corriendo una instalacion de Ubuntu Server 22.04, con las funcionalidades de docker y ssh agregadas al principio. Para poder acceder por medio de ssh debe encontrarse en la misma red privada o ser accesible desde internet.
+### Configurar docker
+El usuario que se va a utilizar, en mi caso vriera-server debe ser agregado al group de docker por medio de un root.
+
+```
+sudo groupadd docker
+sudo usermod -aG docker $USER
+```
+
+### Configurar SSH
+
+Agregar al archivo en .ssh/authorized_keys la firma publica generada por las credenciales configuradas en el jenkins
+
+### Seteo para utilizar como ambiente
+
+### Scripts
+
+De este repositorio se debe copiar el contenido de la carpeta /scripts al siguiente path: $HOME/redes
+
+### Configurar el plugin SSH Agent
+En primer lugar, vamos a tener que configurar el plugin SSH Agent. Vamos a agregarlo desde `Manage Jenkins > Manage Plugins` y vamos a seleccionar `SSH Agent`. Luego, vamos a tener que configurar una credencial para poder acceder al servidor remoto. Para esto, vamos a pulsar `Add` en el campo `Credentials` y vamos a seleccionar agregar los datos que autentiquen nuestro acceso al servidor remoto. Esto nos permite usar el plugin en nuestro pipeline, que es el siguiente:
+
+```groovy
+pipeline {
+    agent {
+        node {
+            label 'docker-agent-node'
+        }
+    }
+
+    environment {
+        CI = 'true'
+        REMOTE_USER = 'vriera-server'
+        REMOTE_HOST = '186.139.150.69'
+        REMOTE_PORT = '7022'
+        REMOTE_DIRECTORY = '/home/vriera-server/redes'
+    }
+    
+    stages {
+        stage('Fetch source code') {
+            
+            steps{ 
+                checkout([$class: 'GitSCM', 
+                                                branches: [[name: '*/main']],
+                                                userRemoteConfigs: [[credentialsId:'ssh-key' , url: 'https://github.com/szavalia/todo-app']]])
+            } 
+        }
+
+        stage('Resolve dependencies') {
+            steps{ 
+                echo "Resolving dependencies💡"
+                cache(maxCacheSize: 250, defaultBranch: 'develop', caches: [
+                arbitraryFileCache(path: 'node_modules', cacheValidityDecidingFile: 'yarn.lock')
+                ]) {
+                     sh '''
+                        echo "cache not found, fetching dependencies"
+                        yarn install 
+                        '''
+                }
+            } 
+        }
+
+        stage('Test') {
+            steps { 
+                echo "Testing ️🥊"
+                sh '''
+                yarn test
+                '''
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // You can add your build steps here
+                echo "Building 🛠️"
+                sh '''
+                yarn build
+                '''
+            }
+        }
+
+        stage('Select environment') {
+            steps {
+                script {
+                    env.TARGET = input message: 'Select deployment environment', parameters: [choice(name: 'ENVIRONMENT', choices: ['stg', 'prod'])]
+                }
+            }
+        }
+
+        stage('Deploy to staging') {
+            when {
+                expression { env.TARGET == 'stg' || env.TARGET == 'prod' }
+            }
+            steps {
+                echo "Deploying to staging 🚀"
+
+                // Copy the build to the remote server
+                sshagent(credentials: ['ssh-key']) {
+                    sh 'scp -P $REMOTE_PORT -o StrictHostKeyChecking=no -r build/ $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIRECTORY/builds/$BUILD_ID'
+                }
+
+                // Deploy the build on the remote server
+                sshagent(credentials: ['ssh-key']) {
+                    sh '''
+                        ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "$REMOTE_DIRECTORY/stage.sh $BUILD_ID"
+                    '''
+                }
+            }
+        }
+
+        
+        stage('Deploy') {
+            when {
+                expression { env.TARGET == 'prod' }
+            }
+            steps {
+                script{
+                    env.STATE="PROD-DEPLOY"
+                }
+                input(message: 'Deploy to production?', ok: 'Deploy', submitter: 'admin')
+                
+                echo "Deploying to production 🚀"
+
+                // Deploy the build on the remote server
+                sshagent(credentials: ['ssh-key']) {
+                    sh '''
+                        ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "$REMOTE_DIRECTORY/prod.sh $BUILD_ID"
+                    '''
+                }
+            }
+        }
+
+        stage('Test deployment') {
+            steps {
+                script{
+                    env.STATE="TEST-DEPLOY"
+                }
+                echo "Testing deployment 🧪"
+                // Deploy the build on the remote server
+                sshagent(credentials: ['ssh-key']) {
+                    sh '''
+                        ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST $REMOTE_DIRECTORY/healtcheck.sh
+                    '''
+                }
+            }
+        }
+
+    }
+
+    post {
+      failure {
+        echo "Build failed 😞"
+        emailext body: "Build failed 😞", subject: "Build failed 😞", to: 'val-riera@hotmail.com'
+        script{
+            if(env.STATE == "TEST-DEPLOY")
+                echo "failed on check deploy"
+        }
+        sshagent(credentials: ['ssh-key']) {
+                sh '''
+                    ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST $REMOTE_DIRECTORY/rollback.sh
+                '''
+        }
+      }
+      success { 
+        echo "Build succeeded 😊"
+        emailext body: "Build succeeded 😊", subject: "Build succeeded 😊", to: 'val-riera@hotmail.com'
+        script{
+            if(env.STATE == "PROD-DEPLOY")
+                echo "success on check deploy"
+        }
+      }
+    }
+}
+```
