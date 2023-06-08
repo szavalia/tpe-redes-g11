@@ -10,24 +10,21 @@ pipeline {
         REMOTE_USER = 'vriera-server'
         REMOTE_HOST = '186.139.150.69'
         REMOTE_PORT = '7022'
-        REMOTE_DIRECTORY = '/home/vriera-server/redes/builds'
+        REMOTE_DIRECTORY = '/home/vriera-server/redes'
     }
     
     stages {
-        stage('pull') {
+        stage('Fetch source code') {
             
             steps{ 
                 checkout([$class: 'GitSCM', 
                                                 branches: [[name: '*/main']],
                                                 userRemoteConfigs: [[credentialsId:'ssh-key' , url: 'https://github.com/szavalia/todo-app']]])
-                echo "${WORKSPACE}"
-                 sh "ls -lat"
             } 
         }
-        stage('Fetch') {
+
+        stage('Resolve dependencies') {
             steps{ 
-
-
                 echo "Resolving dependencies💡"
                 cache(maxCacheSize: 250, defaultBranch: 'develop', caches: [
                 arbitraryFileCache(path: 'node_modules', cacheValidityDecidingFile: 'yarn.lock')
@@ -39,6 +36,7 @@ pipeline {
                 }
             } 
         }
+
         stage('Test') {
             steps { 
                 echo "Testing ️🥊"
@@ -47,8 +45,8 @@ pipeline {
                 '''
             }
         }
+
         stage('Build') {
-            
             steps {
                 // You can add your build steps here
                 echo "Building 🛠️"
@@ -57,21 +55,61 @@ pipeline {
                 '''
             }
         }
-        stage('Deploy') {
+
+        stage('Select environment') {
             steps {
-                input(message: 'Deploy to production?', ok: 'Deploy', submitter: 'admin')
-                
-                echo "Deploying 🚀"
+                script {
+                    env.TARGET = input message: 'Select deployment environment', parameters: [choice(name: 'ENVIRONMENT', choices: ['stg', 'prod'])]
+                }
+            }
+        }
+
+        stage('Deploy to staging') {
+            when {
+                expression { env.TARGET == 'stg' or env.TARGET == 'prod' }
+            }
+            steps {
+                echo "Deploying to staging 🚀"
 
                 // Copy the build to the remote server
                 sshagent(credentials: ['ssh-key']) {
-                    sh 'scp -P $REMOTE_PORT -o StrictHostKeyChecking=no -r build/ $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIRECTORY/$BUILD_ID'
+                    sh 'scp -P $REMOTE_PORT -o StrictHostKeyChecking=no -r build/ $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIRECTORY/builds/$BUILD_ID'
                 }
 
                 // Deploy the build on the remote server
                 sshagent(credentials: ['ssh-key']) {
                     sh '''
-                        ssh -o StrictHostKeyChecking=no -p 7022 vriera-server@186.139.150.69 ./redes/deploy.sh
+                        ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "$REMOTE_DIRECTORY/stage.sh $BUILD_ID"
+                    '''
+                }
+            }
+        }
+
+        stage('Test deployment') {
+            steps {
+                echo "Testing deployment 🧪"
+                // Deploy the build on the remote server
+                sshagent(credentials: ['ssh-key']) {
+                    sh '''
+                        ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST $REMOTE_DIRECTORY/healtcheck.sh
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy') {
+            when {
+                expression { env.TARGET == 'prod' }
+            }
+            steps {
+                input(message: 'Deploy to production?', ok: 'Deploy', submitter: 'admin')
+                
+                echo "Deploying to production 🚀"
+
+                // Deploy the build on the remote server
+                sshagent(credentials: ['ssh-key']) {
+                    sh '''
+                        ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST "$REMOTE_DIRECTORY/deploy.sh $BUILD_ID"
                     '''
                 }
             }
