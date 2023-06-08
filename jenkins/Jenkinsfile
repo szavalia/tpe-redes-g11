@@ -108,10 +108,11 @@ pipeline {
         }
 
         stage('Test deployment') {
-            steps {
-                when {
+            when {
                     expression { env.TARGET == 'prod' }
                 }
+            steps {
+             
                 script{
                     env.STATE="TEST-DEPLOY"
                 }
