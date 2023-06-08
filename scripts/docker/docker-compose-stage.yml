@@ -1,0 +1,7 @@
+version: '3'
+services:
+  todo-app-stage:
+    container_name: todo-app-stage
+    image: ltm/todo-app:${BUILD_ID}
+    ports:
+      - 8010:8010
