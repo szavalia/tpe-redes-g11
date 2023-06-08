@@ -348,7 +348,7 @@ pipeline {
                 // Deploy the build on the remote server
                 sshagent(credentials: ['ssh-key']) {
                     sh '''
-                        ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST $REMOTE_DIRECTORY/healtcheck.sh
+                        ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST $REMOTE_DIRECTORY/healthcheck.sh
                     '''
                 }
             }
